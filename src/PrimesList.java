@@ -1,9 +1,14 @@
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+
+//Puntos 1, 2, 3, 7?  de la rubrica completos
 
 public class PrimesList extends ArrayList<Integer> {
 
     public PrimesList(){
-        super();
+        List<Integer> primes = Collections.synchronizedList(new ArrayList<>());
     }
 
     public static boolean isPrime(int numero){
