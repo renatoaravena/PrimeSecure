@@ -1,15 +1,13 @@
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
 
 
-//Puntos 1, 2, 3, 7?  de la rubrica completos
+
+//Puntos 1, 2, 3, 7? y 10 de la rubrica completos
 
 public class PrimesList extends ArrayList<Integer> {
 
-    public PrimesList(){
-        List<Integer> primes = Collections.synchronizedList(new ArrayList<>());
-    }
+    private final ReentrantLock lock = new ReentrantLock();
 
     public static boolean isPrime(int numero){
 
@@ -23,31 +21,36 @@ public class PrimesList extends ArrayList<Integer> {
         return primo;
     }
 
-    //Devolvera la cantidad de numeros de la lista
-    public int getPrimesCount(){
-        return this.size();
-    }
-
-
-    //Agregué synchronized debido a que estaba presentando inconsistencias al agregar números y luego no se veían reflejados
-    //cuando se imprimía el tamaño de la lista.
     @Override
-    public synchronized boolean add(Integer numero) throws IllegalArgumentException { //devuelve true si se agrego correctamente
-        if (isPrime(numero)) { //Solo si es primo lo agregamos a la lista
+    public boolean add(Integer numero) {
+        lock.lock();
+        try {
+            if (!isPrime(numero)) {
+                throw new IllegalArgumentException("Solo se permiten números primos");
+            }
             return super.add(numero);
-        } else {
-            throw new IllegalArgumentException("El número " + numero + " no es primo y no se puede agregar a la lista.");
+        } finally {
+            lock.unlock();
         }
     }
 
     @Override
-    public synchronized Integer remove(int index) {
-        return super.remove(index);
+    public Integer remove(int index) {
+        lock.lock();
+        try {
+            return super.remove(index);
+        } finally {
+            lock.unlock();
+        }
     }
 
-    @Override
-    public synchronized boolean remove(Object o) {
-        return super.remove(o);
+    public int getPrimesCount() {
+        lock.lock();
+        try {
+            return this.size();
+        } finally {
+            lock.unlock();
+        }
     }
 }
 

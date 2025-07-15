@@ -1,34 +1,38 @@
-public class PrimesThread implements Runnable{
+import java.util.Random;
+import java.util.concurrent.BlockingQueue;
 
-    private PrimesList primesList;
+public class PrimesThread implements Runnable {
+    private final PrimesList primesList;
+    private final BlockingQueue<Integer> taskQueue;
+    private final BlockingQueue<String> resultQueue;
 
-    public PrimesThread(PrimesList primesList) {
+    public PrimesThread(PrimesList primesList,
+                        BlockingQueue<Integer> taskQueue,
+                        BlockingQueue<String> resultQueue) {
         this.primesList = primesList;
+        this.taskQueue = taskQueue;
+        this.resultQueue = resultQueue;
     }
-
 
     @Override
     public void run() {
+        Random random = new Random();
+        try {
+            while (true) {
+                int numero = random.nextInt(1000) + 2;
+                taskQueue.put(numero);
 
-        int numeroRandom = (int) ((Math.random() * 100) + 1); // Genera un número aleatorio entre 1 y 100
-
-        //Verificacion si es primo
-
-        //TODO Preguntar al profe, por que verificar si es primo en el hilo(PrimesThread), si al agregar el numero a la lista con el metodo add,
-        // se verificara si es primo o no. En este caso se estaria haciendo una doble verificacion de lo mismo, una en el hilo y otra nuevamente
-        // en el metodo add de la clase PrimesList.
-
-        if (PrimesList.isPrime(numeroRandom)) { // Verifica si el número es primo
-            //Si es primo, lo agregamos a la lista primesList
-            primesList.add(numeroRandom);
-
-        } else {
-            System.out.println("El número " + numeroRandom + " no es primo.");
+                if (PrimesList.isPrime(numero)) {
+                    synchronized (primesList) {
+                        primesList.add(numero);
+                        String encriptado = "ENCRIPTADO_" + numero * 31;
+                        resultQueue.put("Código Primo: " + numero + " | Mensaje: " + encriptado);
+                    }
+                }
+                Thread.sleep(100);
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
-
     }
-
-
-
-
 }
